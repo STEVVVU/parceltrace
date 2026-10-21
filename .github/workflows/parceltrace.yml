@@ -1,6 +1,7 @@
 name: Parceltrace
 
 on:
+  workflow_dispatch:
   push:
     branches: [parceltrace]
   pull_request:
