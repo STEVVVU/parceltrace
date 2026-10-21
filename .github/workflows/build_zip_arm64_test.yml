@@ -102,7 +102,7 @@ jobs:
 
       # The SignPath artifact configuration expects "LocalSend-*-windows-*-64.zip" containing "localsend_app.exe"
       - name: Sign zip (SignPath)
-        uses: signpath/github-action-submit-signing-request@v2
+        uses: signpath/github-action-submit-signing-request@v3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORG_ID }}
