@@ -136,3 +136,8 @@ Slang, source files in `app/assets/i18n/` (`<locale>.json` plus `_missing_transl
 ## Release notes
 
 `app/pubspec.yaml`'s version must match `#define MyAppVersion` in `support/scripts/compile_windows_exe-inno.iss` and the `version` in `cli/Cargo.toml` (the CLI prints it in its start banner) — CI fails on a mismatch. Platform build commands and release steps are documented in `README.md` ("Building") and `CONTRIBUTING.md` ("Release").
+## Parceltrace fork
+
+This independent fork preserves upstream history and notices. Artifact bundle code lives in `app/lib/parceltrace/`, the page in `app/lib/pages/artifact_bundles_page.dart`, and focused tests in `app/test/unit/parceltrace/`. The page coordinates one receiver store and serializes its operations. Do not claim cross-process cache locking.
+
+Use `.agents/skills/verify-parceltrace/SKILL.md` and `fvm dart app/tool/parceltrace_verify.dart` from the root for actual file-based repair proof. Keep generated evidence ignored. `parceltrace.yml` uses the pinned SDK to analyze, test and build on Linux. Native picker, mobile lifecycle and device-transfer acceptance remain separate unverified paths under the current code-delivery scope.

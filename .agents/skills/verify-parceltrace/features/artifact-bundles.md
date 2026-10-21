@@ -21,3 +21,7 @@ The proof passes when the driver records an incomplete import, successfully reop
 
 - The driver proves the shared filesystem kernel, not operating-system file-picker behavior, native lifecycle behavior, inter-device compatibility, or LocalSend transport.
 - Imported bundle content is treated as inert bytes and never executed.
+
+## Observed evidence
+
+[Hosted run39538466496](https://github.com/STEVVVU/parceltrace/actions/runs/39538466496) at6a285062 passed app analysis, all79 Flutter tests, the real file-based repair driver and the Linux debug build. Downloaded JSON confirms exact-byte reconstruction, duplicate repair import, supported refusal cases and actual temporary-workspace removal. Native pickers, mobile lifecycle and inter-device acceptance remain unverified.
