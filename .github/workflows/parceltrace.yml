@@ -1,0 +1,62 @@
+name: Parceltrace
+
+on:
+  push:
+    branches: [parceltrace]
+  pull_request:
+    branches: [parceltrace]
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.41.9"
+  FLUTTER_ARCHIVE_SHA256: "cf2631dde02570733921a530f47a96abe896b5e334682d2743c29530ea88bb2e"
+  FLUTTER_SUPPRESS_ANALYTICS: "true"
+  DART_SUPPRESS_ANALYTICS: "true"
+  CI: "true"
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify official Flutter archive metadata and checksum
+        shell: bash
+        run: |
+          metadata="$RUNNER_TEMP/releases_linux.json"
+          archive="$RUNNER_TEMP/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
+          curl --fail --location --silent --show-error https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json -o "$metadata"
+          actual_hash="$(jq -er --arg version "$FLUTTER_VERSION" '[.releases[] | select(.channel == "stable" and .version == $version)][0].sha256' "$metadata")"
+          test "$actual_hash" = "$FLUTTER_ARCHIVE_SHA256"
+          curl --fail --location --silent --show-error "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" -o "$archive"
+          echo "$FLUTTER_ARCHIVE_SHA256  $archive" | sha256sum --check --status
+          mkdir -p "$RUNNER_TEMP/flutter-sdk"
+          tar -xJf "$archive" -C "$RUNNER_TEMP/flutter-sdk" --strip-components=1
+          echo "$RUNNER_TEMP/flutter-sdk/bin" >> "$GITHUB_PATH"
+      - name: Confirm pinned SDK
+        run: test "$(flutter --version --machine | jq -r .frameworkVersion)" = "$FLUTTER_VERSION"
+      - name: Install Linux build prerequisites
+        run: sudo apt-get update && sudo apt-get install --yes clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libayatana-appindicator3-dev
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --component clippy
+      - name: Resolve Flutter workspace dependencies
+        working-directory: app
+        run: flutter pub get
+      - name: Analyze app
+        working-directory: app
+        run: flutter analyze
+      - name: Test app
+        working-directory: app
+        run: flutter test
+      - name: Drive artifact repair and retain cleanup evidence
+        run: dart app/tool/parceltrace_verify.dart
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parceltrace-evidence
+          path: .verification-evidence/parceltrace/latest.json
+      - name: Build Linux app
+        working-directory: app
+        run: flutter build linux --debug

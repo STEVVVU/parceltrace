@@ -12,6 +12,9 @@
 
 .refena_inspector/
 
+/.audit/
+/.verification-evidence/
+
 /secrets
 
 # FVM Version Cache
