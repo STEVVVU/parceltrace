@@ -25,3 +25,5 @@ The proof passes when the driver records an incomplete import, successfully reop
 ## Observed evidence
 
 [Hosted run39538466496](https://github.com/STEVVVU/parceltrace/actions/runs/39538466496) at6a285062 passed app analysis, all79 Flutter tests, the real file-based repair driver and the Linux debug build. Downloaded JSON confirms exact-byte reconstruction, duplicate repair import, supported refusal cases and actual temporary-workspace removal. Native pickers, mobile lifecycle and inter-device acceptance remain unverified.
+
+The maintained driver now requires a normal multi-part send batch. Its 12 MiB fixture creates four default parts; the receiver imports the first completed part, reopens, and repairs the remainder. The earlier smaller probe constructed a custom chunk subset and proved the kernel’s subset API rather than default-batch interruption. Current tests and local driver pass; this strengthened fixture requires its own hosted result.

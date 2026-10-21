@@ -16,7 +16,7 @@ Future<void> main() async {
   try {
     var randomState = 0x6d2b79f5;
     final source = Uint8List.fromList(
-      List<int>.generate(1536 * 1024, (_) {
+      List<int>.generate(12 * 1024 * 1024, (_) {
         randomState ^= randomState << 13;
         randomState ^= randomState >>> 17;
         randomState ^= randomState << 5;
@@ -27,7 +27,7 @@ Future<void> main() async {
     final bundle = ArtifactBundle.fromBytes(fileName: 'recovered.bin', bytes: source);
     final sourceHash = sha256.convert(source).toString();
     final allParts = bundle.createParts();
-    _check(bundle.manifest.chunks.length > 1 && allParts.isNotEmpty, 'bounded chunking produced multiple chunks and portable packs');
+    _check(bundle.manifest.chunks.length > 1 && allParts.length > 1, 'normal send batch must contain multiple completed part files');
     actions.add({
       'action': 'create',
       'manifestId': bundle.manifest.id,
@@ -59,8 +59,7 @@ Future<void> main() async {
       'result': 'all rejected before durable import',
     });
 
-    final initiallyAvailable = [for (var i = 0; i < bundle.manifest.chunks.length ~/ 2; i++) i];
-    final initialParts = bundle.createParts(onlyChunks: initiallyAvailable);
+    final initialParts = [allParts.first];
     final receiverRoot = Directory('${workspace.path}${Platform.pathSeparator}receiver');
     final receiver = await BundleReceiverStore.open(receiverRoot);
     for (final part in initialParts) {
@@ -73,6 +72,7 @@ Future<void> main() async {
     _check(_same(missingBeforeRestart, missingAfterRestart), 'missing chunk state survives store reopen');
     actions.add({
       'action': 'partial-import-and-reopen',
+      'completedDefaultPartsImported': initialParts.length,
       'availableChunks': bundle.manifest.chunks.length - missingAfterRestart.length,
       'missingChunks': missingAfterRestart.length,
     });

@@ -29,7 +29,7 @@ Run the maintained driver from the repository root:
 fvm dart app/tool/parceltrace_verify.dart
 ```
 
-The driver creates a synthetic source, builds packs, imports only a subset into a real temporary receiver store, closes and reopens that store, exports the missing-chunk request, makes repair packs from the original bytes, imports them idempotently, and verifies the reconstructed output byte-for-byte. It also exercises corrupt pack, foreign manifest, changed source, unsafe basename, and output path escape rejection. The driver uses the same `ArtifactBundle` and `BundleReceiverStore` APIs as the Flutter page.
+The driver creates a synthetic source, builds packs, creates a normal four-part batch for a 12 MiB source and imports only its first completed part into a real temporary receiver store, closes and reopens that store, exports the missing-chunk request, makes repair packs from the original bytes, imports them idempotently, and verifies the reconstructed output byte-for-byte. It also exercises corrupt pack, foreign manifest, changed source, unsafe basename, and output path escape rejection. The driver uses the same `ArtifactBundle` and `BundleReceiverStore` APIs as the Flutter page.
 
 ## Evidence
 

@@ -28,13 +28,23 @@ void main() {
     });
 
     test('imports incomplete parts, reopens, repairs, and verifies final output', () async {
-      final source = Uint8List.fromList(List<int>.generate(2 * 1024 * 1024, (index) => (index * 19 ^ index ~/ 3) & 0xff));
+      var randomState = 0x6d2b79f5;
+      final source = Uint8List.fromList(
+        List<int>.generate(12 * 1024 * 1024, (_) {
+          randomState ^= randomState << 13;
+          randomState ^= randomState >>> 17;
+          randomState ^= randomState << 5;
+          randomState &= 0xffffffff;
+          return randomState & 0xff;
+        }),
+      );
       final bundle = ArtifactBundle.fromBytes(fileName: 'payload.bin', bytes: source);
-      expect(bundle.manifest.chunks.length, greaterThan(1));
+      final parts = bundle.createParts();
+      expect(parts.length, greaterThan(1));
       final root = await Directory.systemTemp.createTemp('parceltrace-test-');
       addTearDown(() => root.delete(recursive: true));
       final store = await BundleReceiverStore.open(Directory('${root.path}${Platform.pathSeparator}receiver'));
-      await store.importPart(bundle.createParts(onlyChunks: [0]).single);
+      await store.importPart(parts.first);
       final missing = await store.missingChunks();
       expect(missing, isNotEmpty);
 
